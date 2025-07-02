@@ -1,27 +1,24 @@
 package ru.ifmo;
 
-import ru.ifmo.localCommands.LocalCommandManager;
-import ru.ifmo.Commands.serverCommands.ServerCommandManager;
-import ru.ifmo.ConsoleIO;
-
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class CommandManagerImpl implements IcommandManager {
 
     private LinkedList<String> answers;
-    private LocalCommandManager localCommandManager;
-    private ServerCommandManager serverCommandManager;
+    private HashMap<String, VerifierCommand> verifierCommandHashMap;
+    private HashMap<String, Icommand> commands;
 
-    public CommandManagerImpl(LocalCommandManager localCommandManager, ServerCommandManager serverCommandManager) {
-        this.localCommandManager = localCommandManager;
-        this.serverCommandManager = serverCommandManager;
+
+    public CommandManagerImpl() {
         answers=new LinkedList<>();
+
     }
 
     @Override
     public String getAnswers() {
         StringBuilder answer = new StringBuilder();
-        answers.stream().forEach(x->answer.append(x+"\n"));
+        answers.forEach(x->answer.append(x+"\n"));
         answers.clear();
         return answer.toString().strip();
     }
@@ -32,32 +29,42 @@ public class CommandManagerImpl implements IcommandManager {
     }
 
     @Override
-    public void execute(String command) {
-        String answer = localCommandManager.execute(command);
+    public void execute(String command) throws IllegalArgumentException {
+        Icommand com = commands.get(command.split(" ")[0]);
+        if(com==null) throw new IllegalArgumentException("такой команды нет");
+
+        String answer = com.execute(command);
         if(answer!=null) answers.add(answer);
-        else{
-            serverCommandManager.execute(command);
-        }
     }
 
     @Override
     public VerifierCommand getVerifierCommand(String comName) {
-        VerifierCommand vcom = localCommandManager.getVerifierCommand(comName);
-        if(vcom!=null) return vcom;
-        return serverCommandManager.getVerifierCommand(comName);
+        var a = commands.get(comName);
+        if(a==null) return null;
+        return a.getVerifierCommand();
     }
 
-    public String localhelp(String command){
-        return localCommandManager.help(command);
+    @Override
+    public void addCommand(Icommand command) {
+        commands.put(command.getName(),command);
     }
-    public String serverhelp(String command){
-        return serverCommandManager.help(command);
+
+    public String help(String comName){
+        var a =  getVerifierCommand(comName);
+        if(a==null) return "";
+        StringBuilder resp = new StringBuilder(comName + ": " + a.getDescription() + "\nпараметры:\n");
+        for (Parameter parameter : a.getParameters()) {
+            resp.append(parameter.getDescription()).append("\n");
+        }
+        return resp.toString().strip();
     }
-    public String localhelp(){
-        return localCommandManager.help();
-    }
-    public String serverhelp(){
-        return serverCommandManager.help();
+
+    public String help(){
+        StringBuilder tmp= new StringBuilder();
+        for (String s : commands.keySet()) {
+            tmp.append(s).append(": ").append(getVerifierCommand(s).getDescription()).append("\n");
+        }
+        return tmp.toString().strip();
     }
 
 }
