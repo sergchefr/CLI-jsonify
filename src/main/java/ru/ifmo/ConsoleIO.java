@@ -12,76 +12,68 @@ public class ConsoleIO {
         console = new Scanner(System.in);
     }
 
-    public void start(){
+    public void start() {
         System.out.println("program started. Type commands or \"help\" for help");
-        while (true) {
 
-            String ans = commandManager.getAnswers();
-            if(!ans.isEmpty()) System.out.println(ans);
 
-            //ввод команды
-            String command = "";
-            System.out.print(">>> ");
-            try {
-                command = console.nextLine();
-            } catch (NoSuchElementException e) {
-                shutdown();
-            }
+        Thread thread = new Thread(() -> {
+            while (true) {
 
-            //Проверка, какой режим нужен. Запускать ли конструктор?
-            command = deleteExtraSpace(command);
-            String[] splittedCommand = (command.split(" "));
-            if(splittedCommand.length==0) continue;
-            if(ArrayHasFlag(splittedCommand,"-c")){
-                //в команде указан флаг
+                String ans = commandManager.getAnswers();
+                if (!ans.isEmpty()) System.out.println(ans);
+
+                //ввод команды
+                String command = "";
+                System.out.print(">>> ");
+                try {
+                    command = console.nextLine();
+                } catch (NoSuchElementException e) {
+                    shutdown();
+                }
+
+                //Проверка, какой режим нужен. Запускать ли конструктор?
+                command = deleteExtraSpace(command);
+                String[] splittedCommand = (command.split(" "));
+                if (splittedCommand.length == 0) continue;
+
+                //получаем верификационную команду
                 String comName = splittedCommand[0];
                 var verifierCommand = commandManager.getVerifierCommand(comName);
-                if(verifierCommand==null) {
+                if (verifierCommand == null) {
                     System.out.println("команды с таким именем не существует");
                     continue;
                 }
-                if(verifierCommand.haveFlag("-c")){
-                    //доконструирование и отправка
 
-                    command = constructor(command);
-                    //System.out.println("выполнение: "+ command);
-                    commandManager.execute(command);
-                }else System.out.println("команда не поддерживает интерактивный конструктор");
-            }else{
-                //в команде не указан флаг
-                var t2 = commandManager.getVerifierCommand(splittedCommand[0]);
-                if(t2==null) {
-                    System.out.println("команды с таким именем не существует");
-                    continue;
-                }
                 //немой ввод
-                if (splittedCommand.length == 2 & t2.getParameters().length == 1) {
+                if (splittedCommand.length == 2 & verifierCommand.getParameters().length == 1) {
                     if (!splittedCommand[1].contains("=")) {
-                        command = splittedCommand[0] + " " + t2.getParameters()[0].getName() + "=" + splittedCommand[1];
+                        command = splittedCommand[0] + " " + verifierCommand.getParameters()[0].getName() + "=" + splittedCommand[1];
                     }
                 }
-                if(t2.verify(command)){
 
-                    //System.out.println("выполнение: "+ command);
+                //доконструирование
+                command = constructor(command);
+
+                if (verifierCommand.verify(command)) {
                     commandManager.execute(command);
-                }
-                else System.out.println("команда введена неверно");
+                } else System.out.println("команда введена неверно");
             }
-        }
+        });
+
+
     }
 
-    public String constructor(String prevcom){
-        //prevcom = deleteExtraSpace(prevcom.replace(" -c ", " "));
-        String[] args =Arrays.copyOfRange(prevcom.split(" "),1,prevcom.split(" ").length-1);
+    public String constructor(String prevcom) {
+        String[] args = Arrays.copyOfRange(prevcom.split(" "), 1, prevcom.split(" ").length - 1);
 
         VerifierCommand com = commandManager.getVerifierCommand(prevcom.split(" ")[0]);
         Parameter[] parameters = com.getParameters();
 
         //проверка на немой ввод
-        if(parameters.length==1&args.length==1){
-            if(parameters[0].verify(args[0])){
-                if(args[0].contains("="))return com.getName()+" "+args[0];
-                else return com.getName()+" "+parameters[0].getName()+"="+args[0];
+        if (parameters.length == 1 & args.length == 1) {
+            if (parameters[0].verify(args[0])) {
+                if (args[0].contains("=")) return com.getName() + " " + args[0];
+                else return com.getName() + " " + parameters[0].getName() + "=" + args[0];
             }
         }
 
@@ -89,8 +81,8 @@ public class ConsoleIO {
 
         //если есть аргументы без "=" - выкидываем.
         LinkedList<String> argLinkedList = new LinkedList<>();
-        for (String t1: args) {
-            if(t1.contains("=")) argLinkedList.add(t1);
+        for (String t1 : args) {
+            if (t1.contains("=")) argLinkedList.add(t1);
         }
 
         //парсим аргументы в списке. если они норм, добавляем в билдер пытаемся добавить в билдер.
@@ -102,16 +94,16 @@ public class ConsoleIO {
         //через запрос билдера вводим недостающие аргументы в билдер. если все элементы добавлены, билдим команду. возвращаем ее
         Parameter nextParam;
         String input;
-        while (!builder.isReady()){
+        while (!builder.isReady()) {
             nextParam = builder.nextParameter();
-            System.out.println(nextParam.getName()+":"+nextParam.getLimitations());
+            System.out.println(nextParam.getName() + ":" + nextParam.getLimitations());
             try {
-                System.out.print(nextParam.getName()+"=");
+                System.out.print(nextParam.getName() + "=");
                 input = console.nextLine();
-                builder.addParameter(nextParam.getName()+"="+input.strip());
+                builder.addParameter(nextParam.getName() + "=" + input.strip());
             } catch (NoSuchElementException e) {
                 shutdown();
-            }catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 continue;
             }
 
@@ -120,11 +112,11 @@ public class ConsoleIO {
 
     }
 
-    public void print(String str){
+    public void print(String str) {
         System.out.println(str);
     }
 
-    private void shutdown(){
+    private void shutdown() {
         System.out.println("emergency exit");
         //manager.exit(1);
         try {
@@ -136,17 +128,17 @@ public class ConsoleIO {
     }
 
     private String deleteExtraSpace(String a) {
-       while (a.contains("  ")|a.contains("= ")|a.contains(" =")){
-           a=a.replace("  "," ");
-           a=a.replace("= ","=");
-           a=a.replace(" =","=");
-       }
-       return a.strip();
+        while (a.contains("  ") | a.contains("= ") | a.contains(" =")) {
+            a = a.replace("  ", " ");
+            a = a.replace("= ", "=");
+            a = a.replace(" =", "=");
+        }
+        return a.strip();
     }
 
-    private boolean ArrayHasFlag(String[] args,String flag){
+    private boolean ArrayHasFlag(String[] args, String flag) {
         for (String s : args) {
-            if(s.equals(flag)) return true;
+            if (s.equals(flag)) return true;
         }
         return false;
     }
@@ -155,10 +147,10 @@ public class ConsoleIO {
         this.commandManager = CommandManager;
     }
 
-    public static ConsoleIO getInstance(){
-        if(instance==null){
-            instance=new ConsoleIO();
+    public static ConsoleIO getInstance() {
+        if (instance == null) {
+            instance = new ConsoleIO();
         }
         return instance;
-}
+    }
 }
