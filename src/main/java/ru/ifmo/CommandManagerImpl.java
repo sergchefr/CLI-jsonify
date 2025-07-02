@@ -8,11 +8,15 @@ public class CommandManagerImpl implements IcommandManager {
     private LinkedList<String> answers;
     private HashMap<String, VerifierCommand> verifierCommandHashMap;
     private HashMap<String, Icommand> commands;
+    private Reader reader;
+    private String configname;
+
+    private static CommandManagerImpl instance;
 
 
-    public CommandManagerImpl() {
+    private CommandManagerImpl(String filename) {
         answers=new LinkedList<>();
-
+        reader = new XMLreader(filename);
     }
 
     @Override
@@ -39,12 +43,13 @@ public class CommandManagerImpl implements IcommandManager {
 
     @Override
     public VerifierCommand getVerifierCommand(String comName) {
-        var a = commands.get(comName);
-        if(a==null) return null;
-        return a.getVerifierCommand();
+        return verifierCommandHashMap.get(comName);
     }
     public void addCommand(Icommand command) {
         commands.put(command.getName(),command);
+
+
+        //TODO чтение из xml
     }
 
     public String help(String comName){
@@ -64,5 +69,12 @@ public class CommandManagerImpl implements IcommandManager {
         }
         return tmp.toString().strip();
     }
+
+    public static CommandManagerImpl getInstance(){
+        if (instance==null) instance = new CommandManagerImpl("");
+        return instance;
+    }
+
+
 
 }

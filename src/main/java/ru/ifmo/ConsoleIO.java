@@ -12,9 +12,9 @@ public class ConsoleIO {
         console = new Scanner(System.in);
     }
 
-    public void start() {
+    public void start(IcommandManager commandManager) {
         System.out.println("program started. Type commands or \"help\" for help");
-
+        this.commandManager=commandManager;
 
         Thread thread = new Thread(() -> {
             while (true) {

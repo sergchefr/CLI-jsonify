@@ -2,6 +2,8 @@ package ru.ifmo;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        ConsoleIO consoleIO = ConsoleIO.getInstance();
+        CommandManagerImpl commandManager = CommandManagerImpl.getInstance();
+        commandManager.addCommand(new );
     }
 }
