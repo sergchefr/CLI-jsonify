@@ -43,8 +43,6 @@ public class CommandManagerImpl implements IcommandManager {
         if(a==null) return null;
         return a.getVerifierCommand();
     }
-
-    @Override
     public void addCommand(Icommand command) {
         commands.put(command.getName(),command);
     }

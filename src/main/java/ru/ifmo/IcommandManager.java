@@ -6,9 +6,6 @@ public interface IcommandManager {
     VerifierCommand getVerifierCommand(String comName);
     void addAnswer(String answer);
     String getAnswers();
-
-    void addCommand(Icommand command);
-
     String help(String command);
     String help();
 
