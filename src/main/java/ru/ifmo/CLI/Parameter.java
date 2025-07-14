@@ -6,10 +6,10 @@ import java.math.BigDecimal;
 
 public class Parameter {
     private String name;
-    private String limitations;
     private String description;
+
+    private String limitations;
     private String type;
-    private String limits;// скобки
     private BigDecimal minLim;//значения
     private BigDecimal maxLim;
 
@@ -20,12 +20,14 @@ public class Parameter {
 
         if(limitations.contains(":")){
             type=limitations.split(":") [0];
-            //тут ненправильно! там же еще и обозначения типа данных!
-            limits= ""+limitations.charAt(0)+limitations.charAt(limitations.length()-1);
-            minLim=new BigDecimal(limitations.split(";")[0].substring(1));
 
-            String substring = limitations.split(";")[1].substring(0, limitations.split(";")[1].length() - 1);
-            maxLim=new BigDecimal(substring);
+            String limit = limitations.split(":")[1];
+            String minvalStr = limit.split(";")[0].substring(1);
+            String maxvalStr = limit.split(";")[1];
+            maxvalStr = maxvalStr.substring(0,maxvalStr.length()-1);
+
+            minLim=new BigDecimal(minvalStr);
+            maxLim=new BigDecimal(maxvalStr);
         }else{
             type = limitations;
         }
@@ -68,31 +70,40 @@ public class Parameter {
             case "int", "long", "double", "float":
                 try {
                     BigDecimal a =new BigDecimal(param.trim());
+                    return inLim(a);
                 } catch (Exception e) {
                     return false;
                 }
         }
         return false;
     }
-
     private boolean inLim(BigDecimal arg) {
-        if(limits==null)return true;
-//дописать то херня вопрос, но что сделать с бесконечностью?
+        String limit = limitations.split(":")[1];
+        String minvalStr = limit.split(";")[0].substring(1);
+        String maxvalStr = limit.split(";")[1];
+        maxvalStr = maxvalStr.substring(0,maxvalStr.length()-1);
+
+
         if (!minvalStr.substring(1).equals("-inf")) {
             try {
-                if (minvalStr.toCharArray()[0] == '(' && arg <= Double.parseDouble(minvalStr.substring(1))) return false;
-                if (minvalStr.toCharArray()[0] == '[' && arg < Double.parseDouble(minvalStr.substring(1))) return false;
+                if(minvalStr.charAt(0)=='('){
+                    if (arg.compareTo(minLim)<=0) return false;
+                }else if (minvalStr.charAt(0)=='['){
+                    if (arg.compareTo(minLim)<0) return false;
+                }else{
+                    return false;
+                }
             } catch (Exception e) {
                 return false;
             }
         }
 
-        String substring = maxvalStr.substring(0, maxvalStr.length() - 1);
-        if (!substring.equals("+inf")) {
-            try {
-                if (maxvalStr.toCharArray()[1] == ')' && arg >= Double.parseDouble(substring)) return false;
-                if (maxvalStr.toCharArray()[1] == ']' && arg > Double.parseDouble(substring)) return false;
-            } catch (Exception e) {
+        if (!maxvalStr.substring(0, maxvalStr.length() - 1).equals("+inf")){
+            if(minvalStr.charAt(0)=='('){
+                if (arg.compareTo(minLim)>=0) return false;
+            }else if (minvalStr.charAt(0)=='['){
+                if (arg.compareTo(minLim)>0) return false;
+            }else{
                 return false;
             }
         }
