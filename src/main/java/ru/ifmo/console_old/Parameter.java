@@ -1,4 +1,4 @@
-package ru.ifmo;
+package ru.ifmo.console_old;
 
 public class Parameter {
     private String name;

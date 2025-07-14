@@ -1,4 +1,4 @@
-package ru.ifmo;
+package ru.ifmo.console_old;
 
 import java.util.ArrayList;
 
@@ -11,20 +11,19 @@ public class VerifierCommandBuilder {
     private ArrayList<Parameter> parameters=new ArrayList<>();
     private ArrayList<String> flags=new ArrayList<>();
 
-    public void setName(String name) {
+    public VerifierCommandBuilder setName(String name) {
         this.name = name;
+        return this;
     }
 
-    public void setDescription(String description) {
+    public VerifierCommandBuilder setDescription(String description) {
         this.description = description;
+        return this;
     }
 
-    public void addParamameter(Parameter parameter){
+    public VerifierCommandBuilder addParamameter(Parameter parameter){
         if(parameter!=null) parameters.add(parameter);
-    }
-
-    public void addFlag(String flag){
-        flags.add(flag);
+        return this;
     }
 
     public VerifierCommand build(){

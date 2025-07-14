@@ -1,4 +1,4 @@
-package ru.ifmo;
+package ru.ifmo.console_old;
 
 import java.util.*;
 
@@ -60,12 +60,17 @@ public class ConsoleIO {
             }
         });
 
+        thread.start();
 
     }
 
     public String constructor(String prevcom) {
-        String[] args = Arrays.copyOfRange(prevcom.split(" "), 1, prevcom.split(" ").length - 1);
-
+        String[] args;
+        if(prevcom.split(" ").length>1) {
+             args = Arrays.copyOfRange(prevcom.split(" "), 1, prevcom.split(" ").length - 1);
+        }else{
+             args = new String[]{""};
+        }
         VerifierCommand com = commandManager.getVerifierCommand(prevcom.split(" ")[0]);
         Parameter[] parameters = com.getParameters();
 

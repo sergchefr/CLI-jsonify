@@ -1,4 +1,4 @@
-package ru.ifmo;
+package ru.ifmo.console_old;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,6 +15,10 @@ public class CommandManagerImpl implements IcommandManager {
 
 
     private CommandManagerImpl(String filename) {
+        configname=filename;
+        verifierCommandHashMap = new HashMap<>();
+        commands=new HashMap<>();
+
         answers=new LinkedList<>();
         reader = new XMLreader(filename);
     }
@@ -47,9 +51,9 @@ public class CommandManagerImpl implements IcommandManager {
     }
     public void addCommand(Icommand command) {
         commands.put(command.getName(),command);
-
-
-        //TODO чтение из xml
+        VerifierCommand verifierCommand = command.getVerifierCommand();
+        if (verifierCommand==null) verifierCommand = reader.getVerifierCommand(command.getName());
+        verifierCommandHashMap.put(verifierCommand.getName(), verifierCommand);
     }
 
     public String help(String comName){
@@ -71,7 +75,7 @@ public class CommandManagerImpl implements IcommandManager {
     }
 
     public static CommandManagerImpl getInstance(){
-        if (instance==null) instance = new CommandManagerImpl("");
+        if (instance==null) instance = new CommandManagerImpl("C:/Users/Сергей/IdeaProjects/AISmartHome/src/main/resources/Commands.xml");
         return instance;
     }
 
