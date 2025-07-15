@@ -1,10 +1,12 @@
-package ru.ifmo.CLI;
+package ru.ifmo;
+
+import ru.ifmo.CLI.ComLine;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-public class Console implements ComLine{
+public class Console implements ComLine {
     private Scanner console;
 
     @Override

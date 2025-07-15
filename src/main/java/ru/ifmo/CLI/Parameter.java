@@ -1,36 +1,20 @@
 package ru.ifmo.CLI;
 
-import ru.ifmo.console_old.ParameterBuilder;
+import ru.ifmo.CLI.parameter_validators.Validator;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 
 public class Parameter {
     private String name;
     private String description;
-
     private String limitations;
-    private String type;
-    private BigDecimal minLim;//значения
-    private BigDecimal maxLim;
+    private static HashMap<String, Validator> validators;
 
     public Parameter(String name, String limitations, String description) {
         this.description = description;
         this.limitations = limitations;
         this.name = name;
-
-        if(limitations.contains(":")){
-            type=limitations.split(":") [0];
-
-            String limit = limitations.split(":")[1];
-            String minvalStr = limit.split(";")[0].substring(1);
-            String maxvalStr = limit.split(";")[1];
-            maxvalStr = maxvalStr.substring(0,maxvalStr.length()-1);
-
-            minLim=new BigDecimal(minvalStr);
-            maxLim=new BigDecimal(maxvalStr);
-        }else{
-            type = limitations;
-        }
     }
     public static ParameterBuilder builder(){
         return new ParameterBuilder();
@@ -55,58 +39,25 @@ public class Parameter {
             return this;
         }
 
+
+
         public Parameter build() {
             if (description.isEmpty()) description = "нет описания для данного параметра";
             if (name.isEmpty()) throw new IllegalArgumentException("у класса должно быть имя");
             return new Parameter(name, limitations, description);
         }
+
     }
 
+    public static void addValidator(String header, Validator validator){
+        validators.put(header, validator);
+    }
 
     public boolean verify(String param){
-        switch (type){
-            case "String":
-                return true;
-            case "int", "long", "double", "float":
-                try {
-                    BigDecimal a =new BigDecimal(param.trim());
-                    return inLim(a);
-                } catch (Exception e) {
-                    return false;
-                }
+        String valName = limitations.split(":")[0].strip();
+        if(!validators.containsKey(valName)) return false;
+        else{
+            return validators.get(valName).validate(limitations,param);
         }
-        return false;
-    }
-    private boolean inLim(BigDecimal arg) {
-        String limit = limitations.split(":")[1];
-        String minvalStr = limit.split(";")[0].substring(1);
-        String maxvalStr = limit.split(";")[1];
-        maxvalStr = maxvalStr.substring(0,maxvalStr.length()-1);
-
-
-        if (!minvalStr.substring(1).equals("-inf")) {
-            try {
-                if(minvalStr.charAt(0)=='('){
-                    if (arg.compareTo(minLim)<=0) return false;
-                }else if (minvalStr.charAt(0)=='['){
-                    if (arg.compareTo(minLim)<0) return false;
-                }else{
-                    return false;
-                }
-            } catch (Exception e) {
-                return false;
-            }
-        }
-
-        if (!maxvalStr.substring(0, maxvalStr.length() - 1).equals("+inf")){
-            if(minvalStr.charAt(0)=='('){
-                if (arg.compareTo(minLim)>=0) return false;
-            }else if (minvalStr.charAt(0)=='['){
-                if (arg.compareTo(minLim)>0) return false;
-            }else{
-                return false;
-            }
-        }
-        return true;
     }
 }
