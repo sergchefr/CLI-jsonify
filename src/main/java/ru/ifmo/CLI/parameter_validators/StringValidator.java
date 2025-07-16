@@ -7,8 +7,8 @@ public class StringValidator implements Validator{
         String arg = limitations.split(":")[1];
         switch (arg){
             case "no_space":
-                return !arg.contains(" ");
+                return !param.contains(" ");
         }
-        return true;
+        return false;
     }
 }

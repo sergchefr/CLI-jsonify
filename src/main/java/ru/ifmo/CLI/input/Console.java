@@ -1,6 +1,4 @@
-package ru.ifmo;
-
-import ru.ifmo.CLI.ComLine;
+package ru.ifmo.CLI.input;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
@@ -15,10 +13,9 @@ public class Console implements ComLine {
     }
 
     @Override
-    public void read() throws IOException {
-        String command = "";
+    public String read() throws IOException {
         try {
-            command = console.nextLine();
+            return console.nextLine();
         } catch (NoSuchElementException e) {
             throw new IOException();
         }

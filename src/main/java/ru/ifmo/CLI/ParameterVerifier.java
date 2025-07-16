@@ -2,16 +2,15 @@ package ru.ifmo.CLI;
 
 import ru.ifmo.CLI.parameter_validators.Validator;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 
-public class Parameter {
+public class ParameterVerifier {
     private String name;
     private String description;
     private String limitations;
-    private static HashMap<String, Validator> validators;
+    private static HashMap<String, Validator> validators = new HashMap<>();
 
-    public Parameter(String name, String limitations, String description) {
+    public ParameterVerifier(String name, String limitations, String description) {
         this.description = description;
         this.limitations = limitations;
         this.name = name;
@@ -41,10 +40,10 @@ public class Parameter {
 
 
 
-        public Parameter build() {
+        public ParameterVerifier build() {
             if (description.isEmpty()) description = "нет описания для данного параметра";
             if (name.isEmpty()) throw new IllegalArgumentException("у класса должно быть имя");
-            return new Parameter(name, limitations, description);
+            return new ParameterVerifier(name, limitations, description);
         }
 
     }
@@ -59,5 +58,17 @@ public class Parameter {
         else{
             return validators.get(valName).validate(limitations,param);
         }
+    }
+
+    public String getDescription(){
+        return description;
+    }
+
+    public String getLimitations() {
+        return limitations;
+    }
+
+    public String getName() {
+        return name;
     }
 }

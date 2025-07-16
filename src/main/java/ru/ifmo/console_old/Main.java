@@ -3,7 +3,7 @@ package ru.ifmo.console_old;
 public class Main {
     public static void main(String[] args) {
         CommandManagerImpl commandManager = CommandManagerImpl.getInstance();
-        commandManager.addCommand(new TableLampCommand());
+        //commandManager.addCommand(new TableLampCommand());
         ConsoleIO.getInstance().start(commandManager);
         ConsoleIO.getInstance().print("goool");
 
