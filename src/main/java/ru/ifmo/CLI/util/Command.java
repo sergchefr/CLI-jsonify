@@ -27,7 +27,7 @@ public class Command {
     /**
      * Создание объекта команды, который затем конвертируется в json.
      */
-    static class CommandBuilder{
+    static public class CommandBuilder{
         private ArrayList<ParameterVerifier> parameterVerifiers;
         private String name;
         private ArrayList<Parameter> parameters = new ArrayList<>();
