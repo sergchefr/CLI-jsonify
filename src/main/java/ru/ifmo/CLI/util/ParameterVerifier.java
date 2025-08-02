@@ -1,5 +1,8 @@
-package ru.ifmo.CLI;
+package ru.ifmo.CLI.util;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import ru.ifmo.CLI.parameter_validators.ValidationException;
 import ru.ifmo.CLI.parameter_validators.Validator;
 
 import java.util.HashMap;
@@ -8,13 +11,16 @@ public class ParameterVerifier {
     private String name;
     private String description;
     private String limitations;
+
     private static HashMap<String, Validator> validators = new HashMap<>();
 
-    public ParameterVerifier(String name, String limitations, String description) {
+    @JsonCreator
+    public ParameterVerifier(@JsonProperty("name")String name,@JsonProperty("limitation") String limitations,@JsonProperty("description") String description) {
         this.description = description;
         this.limitations = limitations;
         this.name = name;
     }
+
     public static ParameterBuilder builder(){
         return new ParameterBuilder();
     }
@@ -52,10 +58,14 @@ public class ParameterVerifier {
         validators.put(header, validator);
     }
 
-    public boolean verify(String param){
+    public boolean verify(String param) throws ValidationException {
         String valName = limitations.split(":")[0].strip();
-        if(!validators.containsKey(valName)) return false;
+        if(!validators.containsKey(valName)){
+
+            throw new ValidationException("такого валидатора не существует: "+valName);
+        }
         else{
+            //System.out.println(validators.get(valName).validate(limitations,param));
             return validators.get(valName).validate(limitations,param);
         }
     }
