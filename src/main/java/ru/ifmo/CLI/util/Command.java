@@ -14,13 +14,12 @@ import java.util.ArrayList;
 public class Command {
     private ArrayList<Parameter> parameters;
     private String name;
-    private String description;
 
     public Command(String name, ArrayList<Parameter> parameters){
         this.parameters = parameters;
         this.name = name;
     }
-    public Command interactiveBuilder(CommandVerifier verifier, ComLine inputDevice){
+    public static Command interactiveBuilder(CommandVerifier verifier, ComLine inputDevice){
          return new CommandBuilder(verifier).interactiveBuild(inputDevice);
     }
 
@@ -36,9 +35,13 @@ public class Command {
          * Вложенный класс, отвечающий за создание объектов, содержащих всю необходимую информацию о введенной команде
         @param verifier CommandVerifier, представляющий структуру команды, которую необходимо создать.
          */
-        public CommandBuilder(CommandVerifier verifier){
+        private CommandBuilder(CommandVerifier verifier){
             name = verifier.getName();
             parameterVerifiers = verifier.getParameters();
+        }
+
+        public CommandBuilder(){
+
         }
 
         /**
@@ -51,9 +54,6 @@ public class Command {
                 try {
                     boolean a = false;
                     while (!a) {
-                        //inputDevice.print(parameterVerifier.getName()+": "+ parameterVerifier.getDescription() + "\nlimitations: " + parameterVerifier.getLimitations() + "\n>>>");
-                        //String arg = inputDevice.read();
-
                         inputDevice.println(parameterVerifier.getLimitations());
                         String arg = inputDevice.read(parameterVerifier.getName()+"=");
                         a=parameterVerifier.verify(arg);
@@ -67,14 +67,39 @@ public class Command {
 
         }
 
-        public CommandBuilder name(String name){
+        public CommandBuilder forceName(String name){
             this.name = name;
             return this;
         }
-        public CommandBuilder parameter(Parameter parameter){
+        public CommandBuilder forceParameter(Parameter parameter){
             parameters.add(parameter);
             return this;
         }
+
+        public boolean hasnext(){
+            return parameterVerifiers.size()>parameters.size();
+        }
+
+        public String getNextLimitations(){
+            return parameterVerifiers.get(parameters.size()).getLimitations();
+        }
+
+        public String getNextDescription(){
+            return parameterVerifiers.get(parameters.size()).getDescription();
+        }
+
+        public String getNextName(){
+            return parameterVerifiers.get(parameters.size()).getName();
+        }
+
+        //true if collection changed
+        public boolean addParameter(String parameter){
+            ParameterVerifier verifier= parameterVerifiers.get(parameters.size());
+            if (verifier.verify(parameter))
+                return parameters.add(new Parameter(verifier.getName(),parameter));
+            return false;
+        }
+
         public Command build(){
             return new Command(name,parameters);
         }

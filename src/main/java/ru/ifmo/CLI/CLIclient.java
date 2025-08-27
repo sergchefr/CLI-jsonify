@@ -4,6 +4,7 @@ import ru.ifmo.CLI.input.ComLine;
 import ru.ifmo.CLI.parameter_validators.FloatValidator;
 import ru.ifmo.CLI.parameter_validators.IntValidator;
 import ru.ifmo.CLI.parameter_validators.StringValidator;
+import ru.ifmo.CLI.parameter_validators.ValidationException;
 import ru.ifmo.CLI.util.Command;
 import ru.ifmo.CLI.util.CommandVerifier;
 import ru.ifmo.CLI.util.JsonReader;
@@ -19,22 +20,48 @@ public class CLIclient {
     private HashMap<String, CommandVerifier> coms;
     private Consumer consumer;
 
-    public CLIclient(String source, ComLine comLine, Consumer consumer) throws IOException {
-        this.source = source;
+
+//v1
+    public CLIclient(String configSource, ComLine comLine, Consumer consumer) throws IOException {
         this.comLine = comLine;
+
         this.consumer = consumer;
+
+        this.source = source;
         reader = new JsonReader(source);
         var commands = reader.getCommands();
         coms = new HashMap<>();
         for (CommandVerifier command : commands) {
             coms.put(command.getName(), command);
         }
-        ParameterVerifier.addValidator("string",new StringValidator());
-        ParameterVerifier.addValidator("int",new IntValidator());
-        ParameterVerifier.addValidator("float",new FloatValidator());
+
+    }
+//v2
+    public CLIclient(String configSource, Consumer consumer) throws IOException {
+        this.consumer = consumer;
+
+        this.source = configSource;
+        reader = new JsonReader(source);
+        var commands = reader.getCommands();
+        coms = new HashMap<>();
+        for (CommandVerifier command : commands) {
+            coms.put(command.getName(), command);
+        }
+    }
+
+    public CLIclient(ComLine comLine, Consumer consumer){
+        this.comLine = comLine;
+        this.consumer = consumer;
+        coms = new HashMap<>();
+    }
+
+    public CLIclient(Consumer consumer) {
+        this.consumer = consumer;
+        coms = new HashMap<>();
     }
 
     public void start(){
+        if(comLine==null) throw new RuntimeException("no comline");
         Thread thread = new Thread(()-> {
             try {
                 while (true) {
@@ -42,7 +69,7 @@ public class CLIclient {
                     CommandVerifier verifier = coms.get(input.trim());
                     if(verifier==null) comLine.println("такой команды не существует");
                     else {
-                        consumer.consume(Command.builder(verifier).interactiveBuild(comLine).toJson());
+                        consumer.consume(Command.interactiveBuilder(verifier, comLine).toJson());
                     }
                 }
             } catch (IOException e) {
@@ -51,5 +78,16 @@ public class CLIclient {
             }
         });
         thread.start();
+    }
+
+    public Command.CommandBuilder getCommandBuilder(String comname){
+        System.out.println(coms);
+        var v1 = coms.get(comname);
+        if(v1==null) throw new NullPointerException();
+        return Command.builder(v1);
+    }
+
+    public void addCommandVerifier(CommandVerifier verifier){
+        coms.put(verifier.getName(),verifier);
     }
 }

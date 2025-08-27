@@ -2,8 +2,7 @@ package ru.ifmo.CLI.util;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ru.ifmo.CLI.parameter_validators.ValidationException;
-import ru.ifmo.CLI.parameter_validators.Validator;
+import ru.ifmo.CLI.parameter_validators.*;
 
 import java.util.HashMap;
 
@@ -11,6 +10,11 @@ public class ParameterVerifier {
     private String name;
     private String description;
     private String limitations;
+    {
+        addValidator("string",new StringValidator());
+        addValidator("int",new IntValidator());
+        addValidator("float",new FloatValidator());
+    }
 
     private static HashMap<String, Validator> validators = new HashMap<>();
 
@@ -24,10 +28,13 @@ public class ParameterVerifier {
     public static ParameterBuilder builder(){
         return new ParameterBuilder();
     }
-    static class ParameterBuilder {
+    public static class ParameterBuilder {
         private String name = "";
         private String description = "";
         private String limitations;
+
+        private ParameterBuilder() {
+        }
 
         public ParameterBuilder name(String name) {
             this.name = name;
