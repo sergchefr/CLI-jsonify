@@ -8,6 +8,8 @@ public class StringValidator implements Validator{
         switch (arg){
             case "no_space":
                 return !param.contains(" ");
+            case "":
+                return true;
         }
         return false;
     }
